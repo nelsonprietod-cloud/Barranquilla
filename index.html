@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="es-CO" class="h-full bg-slate-50">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SENA - Guía Integrada de Proyecto de Investigación FPI</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        sena: {
+          green: '#39A900', darkGreen: '#005826', orange: '#FF6B00',
+          dark: '#003049', lightBg: '#F4F6F8', border: '#E2E8F0'
+        }
+      },
+      fontFamily: { sans: ['Work Sans', 'sans-serif'] }
+    }
+  }
+};
+</script>
+<style>
+  .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+  .custom-scroll::-webkit-scrollbar-track { background: #EDF2F7; border-radius: 4px; }
+  .custom-scroll::-webkit-scrollbar-thumb { background: #39A900; border-radius: 4px; }
+
+  .tab-content { display: none; opacity: 0; transition: opacity .25s ease; }
+  .tab-content.active { display: block; opacity: 1; }
+
+  .dashboard-card {
+    background: #fff; border: 2px solid #E2E8F0; border-radius: 12px;
+    transition: all .25s ease; box-shadow: 0 4px 6px -1px rgba(0,0,0,.05);
+    overflow: hidden;
+  }
+  .dashboard-card:hover {
+    box-shadow: 0 8px 15px -3px rgba(57,169,0,.12); border-color: #39A900;
+  }
+  .dashboard-card.expanded { height: auto !important; max-height: none !important; }
+  .dashboard-card.expanded .custom-scroll { max-height: none !important; overflow: visible !important; }
+
+  .concept-node { transition: transform .2s ease, box-shadow .2s ease; position: relative; }
+  .concept-node:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 6px 12px rgba(57,169,0,.2); }
+  .concept-node::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%);
+    background: #003049; color: #fff; font-size: 11px; padding: 4px 8px; border-radius: 6px;
+    white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .2s;
+    z-index: 30; font-weight: 500;
+  }
+  .concept-node:hover::after, .concept-node:focus::after { opacity: 1; }
+
+  mark { background: #FDE68A; color: inherit; padding: 0 2px; border-radius: 2px; }
+
+  .gantt-grid { display: grid; grid-template-columns: 220px repeat(12, minmax(28px, 1fr)); }
+  .gantt-bar { background: linear-gradient(90deg, #39A900, #005826); color: #fff; font-size: 10px;
+    padding: 2px 6px; border-radius: 4px; text-align: center; white-space: nowrap; overflow: hidden; }
+
+  #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 100; display: flex; flex-direction: column; gap: 8px; }
+  .toast { background: #003049; color: #fff; padding: 10px 16px; border-radius: 8px; font-size: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,.25); animation: slideIn .25s ease; border-left: 4px solid #39A900;
+    max-width: 360px; }
+  .toast.error { border-left-color: #DC2626; }
+  .toast.warn { border-left-color: #F59E0B; }
+  @keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+  .spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.35); border-top-color: #fff;
+    border-radius: 50%; animation: spin .7s linear infinite; display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #btn-top { position: fixed; bottom: 20px; left: 20px; z-index: 40; opacity: 0; pointer-events: none;
+    transition: opacity .25s; }
+  #btn-top.show { opacity: 1; pointer-events: auto; }
+
+  .dark body { background: #0F172A; color: #E2E8F0; }
+  .dark .dashboard-card { background: #1E293B; border-color: #334155; color: #E2E8F0; }
+  .dark .dashboard-card:hover { border-color: #39A900; }
+  .dark header, .dark footer { background: #1E293B; border-color: #334155; }
+  .dark .bg-white { background: #1E293B !important; }
+  .dark .bg-slate-50, .dark .bg-slate-100 { background: #0F172A !important; }
+  .dark .bg-gray-50, .dark .bg-gray-100 { background: #1E293B !important; }
+  .dark .text-slate-800, .dark .text-gray-700 { color: #E2E8F0 !important; }
+  .dark .text-slate-600, .dark .text-gray-600 { color: #CBD5E1 !important; }
+  .dark .border-slate-200, .dark .border-slate-300 { border-color: #334155 !important; }
+
+  @media print {
+    .no-print { display: none !important; }
+    .dashboard-card { break-inside: avoid; border: 1px solid #ccc; box-shadow: none; height: auto !important; }
+    .custom-scroll { max-height: none !important; overflow: visible !important; }
+    .tab-content { display: block !important; opacity: 1 !important; }
+    body { background: #fff !important; color: #000 !important; }
+    main { display: block !important; }
+    main > section { margin-bottom: 12px; page-break-inside: avoid; }
+    .dark body { background: #fff !important; color: #000 !important; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  }
+</style>
+</head>
+<body class="min-h-full flex flex-col font-sans text-slate-800 bg-slate-100 custom-scroll p-3 md:p-6">
+
+<!-- BARRA SUPERIOR -->
+<div class="no-print w-full bg-sena-dark text-white rounded-lg px-4 py-2.5 mb-4 flex flex-wrap justify-between items-center text-xs gap-2 shadow">
+  <div class="flex items-center gap-2">
+    <i class="fa-solid fa-layer-group text-sena-orange text-sm"></i>
+    <span><strong>Plataforma SENA FPI - 2026</strong> | Sistema Integrado de Proyectos de Investigación (SENNOVA)</span>
+  </div>
+  <div class="flex items-center gap-2 flex-wrap">
+    <div class="relative">
+      <input id="search-input" type="search" placeholder="Buscar en el dashboard…" aria-label="Buscar en el dashboard"
+        class="bg-white/10 placeholder:text-slate-300 text-white border border-white/20 rounded pl-8 pr-2 py-1.5 text-xs w-56 focus:outline-none focus:border-sena-green">
+      <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2 text-slate-300 text-xs"></i>
+    </div>
+    <button onclick="openModal('modal-analizador-ia')" class="bg-sena-green hover:bg-sena-darkGreen text-white px-3 py-1.5 rounded font-bold transition-all flex items-center gap-1.5 shadow">
+      <i class="fa-solid fa-robot"></i> Analizar Pregunta IA
+    </button>
+    <button onclick="prepararPDF()" class="bg-sena-orange hover:bg-orange-600 text-white px-3 py-1.5 rounded font-bold transition-all flex items-center gap-1.5 shadow">
+      <i class="fa-solid fa-file-pdf"></i> PDF
+    </button>
+    <button id="btn-expand" onclick="toggleExpandAll()" aria-pressed="false" title="Expandir/colapsar tarjetas"
+      class="bg-slate-700 hover:bg-slate-800 text-white px-3 py-1.5 rounded font-bold transition-all shadow">
+      <i class="fa-solid fa-expand"></i>
+    </button>
+    <button onclick="toggleTheme()" title="Tema claro/oscuro"
+      class="bg-slate-700 hover:bg-slate-800 text-white px-3 py-1.5 rounded font-bold transition-all shadow">
+      <i id="theme-icon" class="fa-solid fa-moon"></i>
+    </button>
+    <button onclick="openModal('modal-ayuda')" title="Atajos de teclado"
+      class="bg-slate-700 hover:bg-slate-800 text-white px-3 py-1.5 rounded font-bold transition-all shadow">
+      <i class="fa-solid fa-keyboard"></i>
+    </button>
+  </div>
+</div>
+
+<!-- ÍNDICE -->
+<nav aria-label="Índice de secciones" class="no-print w-full mb-4 bg-white rounded-lg border border-slate-200 shadow-sm p-2 flex flex-wrap gap-1 text-xs sticky top-2 z-30">
+  <a href="#sec-1" class="px-2.5 py-1 rounded hover:bg-green-50 hover:text-sena-darkGreen font-semibold text-slate-600">1 Ruta</a>
+  <a href="#sec-2" class="px-2.5 py-1 rounded hover:bg-green-50 hover:text-sena-darkGreen font-semibold text-slate-600">2 Resumen</a>
+  <a href="#sec-3" class="px-2.5 py-1 rounded hover:bg-green-50 hover:text-sena-darkGreen font-semibold text-slate-600">3 Descripción</a>
+  <a href="#sec-4" class="px-2.5 py-1 rounded hover:bg-green-50 hover:text-sena-darkGreen font-semibold text-slate-600">4 Conceptual</a>
+  <a href="#sec-5" class="px-2.5 py-1 rounded hover:bg-green-50 hover:text-sena-darkGreen font-semibold text-slate-600">5 Objetivos</a>
+  <a href="#sec-6" class="px-2.5 py-1 rounded hover:bg-green-50 hover:text-sena-darkGreen font-semibold text-slate-600">6 Metodología</a>
+  <a href="#sec-7" class="px-2.5 py-1 rounded hover:bg-green-50 hover:text-sena-darkGreen font-semibold text-slate-600">7 Cronograma</a>
+  <a href="#sec-8" class="px-2.5 py-1 rounded hover:bg-green-50 hover:text-sena-darkGreen font-semibold text-slate-600">8 Bibliografía</a>
+</nav>
+
+<!-- ENCABEZADO -->
+<header class="w-full bg-white border-2 border-sena-green rounded-xl p-4 md:p-5 mb-6 shadow-md flex flex-col gap-3">
+  <div class="flex items-center gap-3">
+    <div class="bg-sena-green text-white px-3 py-1.5 rounded-lg flex items-center justify-center font-bold text-lg tracking-wider shadow">
+      <i class="fa-solid fa-graduation-cap mr-1.5"></i> SENA
+    </div>
+    <div class="h-6 w-0.5 bg-slate-300"></div>
+    <div>
+      <span class="text-xs font-bold uppercase tracking-wider text-sena-orange block">SISTEMA DE INVESTIGACIÓN, DESARROLLO TECNOLÓGICO E INNOVACIÓN (SENNOVA)</span>
+      <span class="text-[11px] text-slate-500 font-medium">Formación Profesional Integral (FPI)</span>
+    </div>
+  </div>
+  <div class="pt-1 border-t border-slate-100">
+    <h1 class="text-base sm:text-lg lg:text-xl font-extrabold text-sena-dark whitespace-nowrap overflow-x-auto custom-scroll pb-1">
+      Ruta Metodológica para la Promoción de la Investigación Pedagógica en la FPI del SENA
+    </h1>
+  </div>
+</header>
+
+<!-- GRID PRINCIPAL -->
+<main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 flex-grow">
+
+  <!-- 1. RUTA -->
+  <section id="sec-1" data-searchable class="dashboard-card p-5 flex flex-col min-h-[420px] border-2 border-sena-green bg-gradient-to-b from-white to-green-50/40">
+    <div class="flex items-center justify-between border-b pb-3 mb-3">
+      <h2 class="font-bold text-sena-darkGreen flex items-center gap-2 text-sm">
+        <span class="bg-sena-green text-white text-xs px-2.5 py-1 rounded-full">📍</span> RUTA METODOLÓGICA (LOCAL)
+      </h2>
+      <span class="text-[11px] font-bold text-sena-orange uppercase bg-orange-100 px-2 py-0.5 rounded">Opción 2 Mixta</span>
+    </div>
+    <div class="custom-scroll overflow-y-auto flex-1 pr-2 text-sm text-gray-700 space-y-3 max-h-[320px]">
+      <p class="font-semibold text-sena-dark text-xs">Diseño de Investigación Mixto Proyectado:</p>
+      <div class="w-full border border-slate-300 rounded-lg overflow-hidden bg-white shadow-sm hover:scale-[1.02] transition-transform cursor-pointer" onclick="openModal('modal-img-ampliada')">
+        <img id="img-ruta" src="./assets/img/ruta-metodologica.jpg" alt="Diagrama Flujo Ruta Metodológica Mixta SENA"
+             loading="lazy" decoding="async" class="w-full h-auto object-contain block" onerror="imgFallback(this)">
+      </div>
+      <div class="bg-gray-100 p-2.5 rounded-md border border-gray-300 text-xs font-mono text-gray-700 break-all">
+        <span class="font-bold text-sena-dark font-sans block">Sugerencia:</span>
+        Copie su imagen a <code>./assets/img/ruta-metodologica.jpg</code> junto al HTML.
+      </div>
+    </div>
+    <div class="border-t pt-3 mt-2">
+      <button onclick="openModal('modal-img-ampliada')" class="w-full bg-sena-green hover:bg-sena-darkGreen text-white font-bold py-2 px-4 rounded-lg text-xs transition-all shadow flex items-center justify-center gap-2">
+        <i class="fa-solid fa-magnifying-glass-plus"></i> Ampliar Diagrama Metodológico
+      </button>
+    </div>
+  </section>
+
+  <!-- 2. RESUMEN -->
+  <section id="sec-2" data-searchable class="dashboard-card p-5 flex flex-col min-h-[420px]">
+    <div class="flex items-center justify-between border-b pb-3 mb-3">
+      <h2 class="font-bold text-sena-dark flex items-center gap-2 text-sm">
+        <span class="bg-sena-green text-white text-xs px-2.5 py-1 rounded-full">2</span> RESUMEN DEL PROYECTO
+      </h2>
+      <span class="text-xs text-gray-400 font-medium"><i class="fa-solid fa-align-left"></i> Máx 500 palabras</span>
+    </div>
+    <div class="custom-scroll overflow-y-auto flex-1 pr-2 text-sm text-gray-700 space-y-3 leading-relaxed text-justify max-h-[320px]">
+      <p class="font-medium text-sena-darkGreen text-xs"><strong>Síntesis del Proyecto:</strong> El presente proyecto cualitativo inductivo aborda la articulación estratégica entre la investigación pedagógica y la Formación Profesional Integral (FPI) del SENA.</p>
+      <p class="text-xs">A través de un diagnóstico situacional en centros de formación, se identificó que instructores de áreas técnicas (taller) y transversales perciben la actividad investigativa como una carga administrativa rígida ("cuadriculada") y desarticulada de sus labores diarias en el aula.</p>
+      <p class="text-xs"><strong>Solución Propuesta:</strong> Se propone el diseño e implementación de una <em>Ruta Metodológica flexible e inductiva</em> que aprovecha la infraestructura de las <strong>Empresas Didácticas Simuladas</strong> como laboratorios naturales de indagación e innovación socio-pedagógica.</p>
+      <p class="text-xs"><strong>Metodología & Entregables:</strong> Bajo el enfoque cualitativo (Sampieri Cap. 12), mediante entrevistas a profundidad, observación y talleres participativos, la investigación derivará en productos tangibles de alto impacto: un <em>Manual Técnico/Guía de Ruta</em>, un <em>Prototipo/Software de seguimiento</em>, un <em>Libro de Sistematización de Experiencias</em> y artículos en revistas científicas.</p>
+    </div>
+    <div class="border-t pt-2 mt-2 flex justify-between items-center text-xs text-gray-500 bg-gray-50 px-3 py-1.5 rounded-md">
+      <span>Deslice para leer completo</span><i class="fa-solid fa-circle-chevron-down text-sena-green"></i>
+    </div>
+  </section>
+
+  <!-- 3. DESCRIPCIÓN -->
+  <section id="sec-3" data-searchable class="dashboard-card p-5 flex flex-col min-h-[420px]">
+    <div class="flex items-center justify-between border-b pb-3 mb-3">
+      <h2 class="font-bold text-sena-dark flex items-center gap-2 text-sm">
+        <span class="bg-sena-green text-white text-xs px-2.5 py-1 rounded-full">3</span> DESCRIPCIÓN DEL PROYECTO
+      </h2>
+      <i class="fa-solid fa-layer-group text-sena-orange"></i>
+    </div>
+    <div class="grid grid-cols-4 gap-1 mb-3 bg-gray-100 p-1 rounded-lg no-print" role="tablist" aria-label="Descripción del proyecto">
+      <button role="tab" aria-selected="true" onclick="switchTab('desc','tab31')" id="btn-tab31" class="tab-btn-desc text-xs font-semibold py-1.5 px-1 rounded-md transition-all text-center bg-white shadow text-sena-green">3.1 Plant.</button>
+      <button role="tab" aria-selected="false" onclick="switchTab('desc','tab32')" id="btn-tab32" class="tab-btn-desc text-xs font-semibold py-1.5 px-1 rounded-md transition-all text-center text-gray-600 hover:text-sena-green">3.2 Form.</button>
+      <button role="tab" aria-selected="false" onclick="switchTab('desc','tab33')" id="btn-tab33" class="tab-btn-desc text-xs font-semibold py-1.5 px-1 rounded-md transition-all text-center text-gray-600 hover:text-sena-green">3.3 Justif.</button>
+      <button role="tab" aria-selected="false" onclick="switchTab('desc','tab34')" id="btn-tab34" class="tab-btn-desc text-xs font-semibold py-1.5 px-1 rounded-md transition-all text-center text-gray-600 hover:text-sena-green">3.4 Antec.</button>
+    </div>
+    <div class="custom-scroll overflow-y-auto flex-1 pr-2 text-sm text-gray-700 leading-relaxed max-h-[300px]">
+      <div id="tab31" role="tabpanel" class="tab-content desc-content active space-y-2">
+        <h3 class="font-bold text-sena-darkGreen border-l-4 border-sena-green pl-2 text-xs">3.1 Planteamiento del Problema</h3>
+        <p class="text-justify text-xs">En la FPI del SENA, los instructores de taller y transversales enfrentan la percepción de que investigar es una tarea administrativa burocrática, rígida y desarticulada del trabajo en aula.</p>
+        <p class="text-justify text-[11px] text-gray-600 bg-green-50 p-2 rounded"><span class="font-bold text-sena-darkGreen">Citas Teóricas:</span> Alquedan & Garzón (2023) evidencian que las competencias investigativas se ejercen de forma intuitiva pero desarticulada; Pinzón (2026) demuestra la tensión entre guías prescriptivas y la práctica real en taller.</p>
+      </div>
+      <div id="tab32" role="tabpanel" class="tab-content desc-content space-y-2">
+        <h3 class="font-bold text-sena-darkGreen border-l-4 border-sena-orange pl-2 text-xs">3.2 Formulación del Problema</h3>
+        <div class="bg-orange-50 p-3 rounded-lg border border-orange-200">
+          <p class="font-medium text-sena-dark italic text-xs">"¿De qué manera se puede diseñar y estructurar una ruta metodológica para la promoción de la investigación pedagógica en la Formación Profesional Integral (FPI), que responda a las realidades de los instructores de taller y transversales e integre las empresas didácticas simuladas como escenarios de producción de conocimiento en un contexto formativo y período de estudio delimitados?"</p>
+        </div>
+      </div>
+      <div id="tab33" role="tabpanel" class="tab-content desc-content space-y-2">
+        <h3 class="font-bold text-sena-darkGreen border-l-4 border-sena-green pl-2 text-xs">3.3 Justificación</h3>
+        <p class="text-justify text-xs">El proyecto responde a la necesidad de fortalecer el rol del instructor como profesional reflexivo. Al sistematizar una ruta amigable, los centros de formación homologan procesos funcionales entre diversas especialidades (agrícola, diseño, gestión, etc.), generando alto valor teórico e impacto social en la comunidad educativa.</p>
+      </div>
+      <div id="tab34" role="tabpanel" class="tab-content desc-content space-y-2">
+        <h3 class="font-bold text-sena-darkGreen border-l-4 border-sena-dark pl-2 text-xs">3.4 Antecedentes</h3>
+        <ul class="list-disc pl-4 space-y-1.5 text-xs">
+          <li><strong>Alquedan Oliva & Garzón López (2023):</strong> Competencias investigativas de los instructores del SENA (Univ. Nariño).</li>
+          <li><strong>Pinzón Hernández (2026):</strong> Planeación didáctica y rol mediador del currículo en el SENA (UNLP).</li>
+          <li><strong>Gamba Mayoral (2025):</strong> Estrategias de enseñanza en la Red de Comercio y Ventas Cauca (UNLP).</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. REFERENTE CONCEPTUAL -->
+  <section id="sec-4" data-searchable class="dashboard-card p-5 flex flex-col min-h-[420px]">
+    <div class="flex items-center justify-between border-b pb-3 mb-3">
+      <h2 class="font-bold text-sena-dark flex items-center gap-2 text-sm">
+        <span class="bg-sena-green text-white text-xs px-2.5 py-1 rounded-full">4</span> REFERENTE CONCEPTUAL
+      </h2>
+      <i class="fa-solid fa-diagram-project text-sena-green"></i>
+    </div>
+    <div class="flex-1 bg-gray-50 rounded-lg p-3 flex flex-col justify-around border border-dashed border-gray-300 relative overflow-hidden">
+      <div class="flex justify-center">
+        <span tabindex="0" class="concept-node bg-sena-dark text-white text-xs px-3 py-1.5 rounded-md font-bold shadow cursor-pointer" data-tip="Proceso teórico-práctico SENA" onclick="showConceptModal('FPI')" onkeydown="if(event.key==='Enter')showConceptModal('FPI')">Formación Profesional Integral (FPI)</span>
+      </div>
+      <div class="flex justify-between items-center px-2">
+        <span tabindex="0" class="concept-node bg-sena-green text-white text-xs px-2.5 py-1.5 rounded-md font-semibold shadow cursor-pointer max-w-[140px] text-center" data-tip="Unidades de análisis" onclick="showConceptModal('Instructores')" onkeydown="if(event.key==='Enter')showConceptModal('Instructores')">Instructores Taller / Transversales</span>
+        <i class="fa-solid fa-arrow-right-left text-gray-400 text-xs"></i>
+        <span tabindex="0" class="concept-node bg-sena-orange text-white text-xs px-2.5 py-1.5 rounded-md font-semibold shadow cursor-pointer max-w-[140px] text-center" data-tip="Laboratorios naturales" onclick="showConceptModal('Empresas')" onkeydown="if(event.key==='Enter')showConceptModal('Empresas')">Empresas Didácticas Simuladas</span>
+      </div>
+      <div class="flex justify-center">
+        <span tabindex="0" class="concept-node bg-sena-darkGreen text-white text-xs px-3 py-1.5 rounded-md font-bold shadow cursor-pointer border border-green-300" data-tip="Producto final" onclick="showConceptModal('Ruta')" onkeydown="if(event.key==='Enter')showConceptModal('Ruta')">🎯 Ruta Metodológica de Promoción</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. OBJETIVOS -->
+  <section id="sec-5" data-searchable class="dashboard-card p-5 flex flex-col min-h-[420px]">
+    <div class="flex items-center justify-between border-b pb-3 mb-3">
+      <h2 class="font-bold text-sena-dark flex items-center gap-2 text-sm">
+        <span class="bg-sena-green text-white text-xs px-2.5 py-1 rounded-full">5</span> OBJETIVOS
+      </h2>
+      <div class="flex gap-1 no-print" role="tablist" aria-label="Objetivos">
+        <button role="tab" aria-selected="true" onclick="switchTab('obj','objGen')" id="btn-objGen" class="tab-btn-obj text-xs font-bold py-1 px-2.5 rounded transition-all bg-sena-green text-white">General</button>
+        <button role="tab" aria-selected="false" onclick="switchTab('obj','objEsp')" id="btn-objEsp" class="tab-btn-obj text-xs font-bold py-1 px-2.5 rounded transition-all bg-gray-200 text-gray-700 hover:bg-gray-300">Específicos</button>
+      </div>
+    </div>
+    <div class="custom-scroll overflow-y-auto flex-1 pr-1 text-xs text-gray-700 max-h-[300px]">
+      <div id="objGen" role="tabpanel" class="tab-content obj-content active">
+        <p class="font-semibold text-sena-darkGreen mb-1 text-xs">Objetivo General:</p>
+        <p class="bg-green-50 p-3 rounded-lg border border-green-200 text-xs leading-relaxed text-justify">Diseñar y desarrollar una ruta metodológica para la promoción de la investigación pedagógica en la Formación Profesional Integral (FPI) del SENA, orientada a los instructores de taller y transversales, integrando las empresas didácticas simuladas como estrategia articuladora.</p>
+      </div>
+      <div id="objEsp" role="tabpanel" class="tab-content obj-content">
+        <p class="font-semibold text-sena-orange mb-1 text-xs">Objetivos Específicos:</p>
+        <ol class="list-decimal pl-4 space-y-2 text-xs text-justify">
+          <li>Explorar las vivencias y percepciones investigativas de los instructores.</li>
+          <li>Examinar la dinámica de integración en las empresas didácticas simuladas.</li>
+          <li>Estructurar la ruta metodológica (Manual Técnico, Software y Libro).</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. METODOLOGÍA -->
+  <section id="sec-6" data-searchable class="dashboard-card p-5 flex flex-col min-h-[380px]">
+    <div class="flex items-center justify-between border-b pb-3 mb-3">
+      <h2 class="font-bold text-sena-dark flex items-center gap-2 text-sm">
+        <span class="bg-sena-green text-white text-xs px-2.5 py-1 rounded-full">6</span> METODOLOGÍA PROPUESTA
+      </h2>
+      <i class="fa-solid fa-microscope text-sena-green"></i>
+    </div>
+    <div class="custom-scroll overflow-y-auto flex-1 pr-2 text-sm text-gray-700 space-y-3 max-h-[280px]">
+      <div class="bg-slate-100 p-2.5 rounded-lg border border-slate-200 text-xs">
+        <span class="font-bold text-sena-dark font-sans block">Diseño Mixto Descriptivo / DEXPLOS (Sampieri Cap. 12)</span>
+        <span class="text-gray-600">Integración de análisis cuantitativo en aprendices y cualitativo en expertos e instructores.</span>
+      </div>
+      <div class="space-y-2 text-xs">
+        <div class="flex items-start gap-2"><i class="fa-solid fa-users text-sena-orange mt-0.5"></i><div><strong>Población 1:</strong> Aprendices de catorce (14) programas de formación del CTA (Encuesta).</div></div>
+        <div class="flex items-start gap-2"><i class="fa-solid fa-user-ninja text-sena-green mt-0.5"></i><div><strong>Población 2:</strong> Seis (06) profesionales expertos en ciencias humanas y educación (Entrevista).</div></div>
+        <div class="flex items-start gap-2"><i class="fa-solid fa-file-invoice text-sena-dark mt-0.5"></i><div><strong>Fase Documental:</strong> Análisis de resultados obtenidos y categorización de las herramientas digitales.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. CRONOGRAMA -->
+  <section id="sec-7" data-searchable class="dashboard-card p-5 flex flex-col min-h-[380px] justify-between bg-gradient-to-br from-white to-green-50/30">
+    <div>
+      <div class="flex items-center justify-between border-b pb-3 mb-3">
+        <h2 class="font-bold text-sena-dark flex items-center gap-2 text-sm">
+          <span class="bg-sena-green text-white text-xs px-2.5 py-1 rounded-full">7</span> CRONOGRAMA DE ACTIVIDADES
+        </h2>
+        <i class="fa-solid fa-calendar-days text-sena-orange"></i>
+      </div>
+      <p class="text-xs text-gray-600 mb-4 text-justify">Planificación estructurada de las 5 fases principales del proyecto a lo largo del periodo de ejecución (12 meses).</p>
+      <div class="space-y-2 text-xs text-gray-700 bg-white p-3 rounded-lg border shadow-sm">
+        <div class="flex justify-between items-center border-b pb-1"><span>Fase 1: Diagnóstico e Inmersión</span><span class="bg-green-100 text-sena-darkGreen font-bold px-1.5 py-0.5 rounded text-[10px]">Mes 1-3</span></div>
+        <div class="flex justify-between items-center border-b pb-1"><span>Fase 2: Encuestas y Entrevistas</span><span class="bg-green-100 text-sena-darkGreen font-bold px-1.5 py-0.5 rounded text-[10px]">Mes 4-6</span></div>
+        <div class="flex justify-between items-center"><span>Fase 3: Entregables (Manual/Software)</span><span class="bg-orange-100 text-sena-orange font-bold px-1.5 py-0.5 rounded text-[10px]">Mes 7-12</span></div>
+      </div>
+    </div>
+    <div class="flex gap-2 mt-4">
+      <button onclick="openModal('modal-cronograma')" class="flex-1 bg-sena-green hover:bg-sena-darkGreen text-white font-bold py-2.5 px-3 rounded-xl text-xs transition-all shadow-md flex items-center justify-center gap-2 group">
+        <i class="fa-solid fa-window-restore group-hover:rotate-12 transition-transform"></i><span>Ver Cronograma</span>
+      </button>
+      <button onclick="exportarICS()" title="Exportar a calendario .ics" class="bg-sena-orange hover:bg-orange-600 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition-all shadow-md">
+        <i class="fa-solid fa-calendar-plus"></i>
+      </button>
+    </div>
+  </section>
+
+  <!-- 8. BIBLIOGRAFÍA -->
+  <section id="sec-8" data-searchable class="dashboard-card p-5 flex flex-col min-h-[380px]">
+    <div class="flex items-center justify-between border-b pb-3 mb-3">
+      <h2 class="font-bold text-sena-dark flex items-center gap-2 text-sm">
+        <span class="bg-sena-green text-white text-xs px-2.5 py-1 rounded-full">8</span> BIBLIOGRAFÍA (APA 7)
+      </h2>
+      <button onclick="copiarBibliografia()" class="no-print text-xs text-sena-green hover:text-sena-darkGreen font-semibold" title="Copiar bibliografía">
+        <i class="fa-solid fa-copy"></i>
+      </button>
+    </div>
+    <div id="biblio-content" class="custom-scroll overflow-y-auto flex-1 pr-2 text-xs text-gray-700 space-y-3 max-h-[300px]">
+      <p class="pl-4 -indent-4 text-justify">Alquedan Oliva, L. M., & Garzón López, L. G. (2023). <em>Competencias investigativas de los instructores del Servicio Nacional de Aprendizaje, Programa SENA Emprende Rural</em> (Tesis de Maestría, Universidad de Nariño).</p>
+      <p class="pl-4 -indent-4 text-justify">Gamba Mayoral, M. (2025). <em>Análisis del diseño de las estrategias de enseñanza de las y los Instructores del SENA, Red de Comercio y Ventas, Regional Cauca</em> (Tesis de Maestría, Universidad Nacional de La Plata).</p>
+      <p class="pl-4 -indent-4 text-justify">Hernández-Sampieri, R., & Mendoza, C. P. (2018). <em>Metodología de la investigación: las rutas cuantitativa, cualitativa y mixta</em>. McGraw-Hill Education.</p>
+      <p class="pl-4 -indent-4 text-justify">Pinzón Hernández, D. C. (2026). <em>Instruir, mediar y enseñar: Una exploración en torno a la planeación didáctica y el rol mediador del currículo desde los testimonios de las y los instructores del Centro de Gestión Industrial del SENA</em> (Tesis de Maestría, Universidad Nacional de La Plata).</p>
+    </div>
+  </section>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="mt-6 bg-white border-2 border-slate-200 rounded-xl p-4 shadow-sm">
+  <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+    <span class="text-xs font-bold uppercase text-sena-dark tracking-wider"><i class="fa-solid fa-cubes text-sena-orange mr-1"></i> Productos y Entregables Proyectados:</span>
+    <div class="flex flex-wrap gap-2 text-xs">
+      <span class="bg-orange-100 text-sena-orange font-bold px-3 py-1 rounded-full border border-orange-200 flex items-center gap-1"><i class="fa-solid fa-book"></i> Libro de Investigación</span>
+      <span class="bg-green-100 text-sena-darkGreen font-bold px-3 py-1 rounded-full border border-green-200 flex items-center gap-1"><i class="fa-solid fa-file-code"></i> Manual Técnico</span>
+      <span class="bg-blue-100 text-blue-800 font-bold px-3 py-1 rounded-full border border-blue-200 flex items-center gap-1"><i class="fa-solid fa-laptop-code"></i> Software / App</span>
+      <span class="bg-purple-100 text-purple-800 font-bold px-3 py-1 rounded-full border border-purple-200 flex items-center gap-1"><i class="fa-solid fa-microchip"></i> Prototipo</span>
+      <span class="bg-gray-100 text-gray-800 font-bold px-3 py-1 rounded-full border border-gray-300 flex items-center gap-1"><i class="fa-solid fa-globe"></i> Revista / Pag Web</span>
+    </div>
+  </div>
+</footer>
+
+<!-- BACK TO TOP -->
+<button id="btn-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Volver arriba"
+  class="no-print bg-sena-green hover:bg-sena-darkGreen text-white w-11 h-11 rounded-full shadow-lg flex items-center justify-center">
+  <i class="fa-solid fa-arrow-up"></i>
+</button>
+
+<!-- TOASTS -->
+<div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+<!-- ============ MODALES ============ -->
+
+<!-- Imagen ampliada -->
+<div id="modal-img-ampliada" role="dialog" aria-modal="true" aria-labelledby="img-modal-title" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+  <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div class="bg-sena-dark text-white p-4 flex justify-between items-center">
+      <h3 id="img-modal-title" class="text-sm font-bold">Diagrama Metodológico de la Ruta</h3>
+      <button onclick="closeModal('modal-img-ampliada')" class="text-gray-300 hover:text-white text-xl font-bold px-2" aria-label="Cerrar">&times;</button>
+    </div>
+    <div class="p-4 overflow-y-auto custom-scroll text-center flex-1">
+      <img id="img-ruta-ampliada" src="./assets/img/ruta-metodologica.jpg" alt="Diagrama Flujo Ampliado" loading="lazy" decoding="async"
+           class="max-w-full h-auto mx-auto rounded-lg shadow-md" onerror="imgFallback(this)">
+      <p class="mt-3 text-xs text-gray-600 font-mono">Ruta: <code>./assets/img/ruta-metodologica.jpg</code></p>
+    </div>
+  </div>
+</div>
+
+<!-- Cronograma -->
+<div id="modal-cronograma" role="dialog" aria-modal="true" aria-labelledby="cron-title" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+  <div class="bg-white w-full max-w-6xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div class="bg-sena-dark text-white p-4 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <span class="bg-sena-orange text-white text-xs font-bold px-2.5 py-1 rounded-full">7</span>
+        <h3 id="cron-title" class="text-sm font-bold">Cronograma General de Actividades (Gantt)</h3>
+      </div>
+      <button onclick="closeModal('modal-cronograma')" class="text-gray-300 hover:text-white text-xl font-bold px-2" aria-label="Cerrar">&times;</button>
+    </div>
+    <div class="p-4 overflow-auto custom-scroll flex-1">
+      <div class="gantt-grid gap-y-1 text-[11px]" id="gantt-container"></div>
+    </div>
+    <div class="bg-gray-100 p-3 flex justify-between items-center border-t gap-2 flex-wrap">
+      <span class="text-xs text-gray-500">Formato SENNOVA · Sistema de Gestión de Proyectos SENA</span>
+      <div class="flex gap-2">
+        <button onclick="exportarICS()" class="bg-sena-orange hover:bg-orange-600 text-white px-3 py-1.5 rounded-lg font-bold text-xs"><i class="fa-solid fa-calendar-plus mr-1"></i> ICS</button>
+        <button onclick="closeModal('modal-cronograma')" class="bg-sena-dark hover:bg-black text-white px-4 py-1.5 rounded-lg font-bold text-xs">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Concepto -->
+<div id="modal-concept" role="dialog" aria-modal="true" aria-labelledby="concept-title" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+  <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
+    <h3 id="concept-title" class="text-base font-bold text-sena-darkGreen mb-2"></h3>
+    <p id="concept-desc" class="text-xs text-gray-700 leading-relaxed mb-4"></p>
+    <button onclick="closeModal('modal-concept')" class="w-full bg-sena-green text-white py-2 rounded-lg font-bold text-xs">Entendido</button>
+  </div>
+</div>
+
+<!-- Ayuda -->
+<div id="modal-ayuda" role="dialog" aria-modal="true" aria-labelledby="ayuda-title" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+  <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
+    <h3 id="ayuda-title" class="text-base font-bold text-sena-darkGreen mb-3"><i class="fa-solid fa-keyboard mr-2"></i>Atajos de teclado</h3>
+    <ul class="text-xs text-gray-700 space-y-1.5">
+      <li><kbd class="bg-gray-100 px-1.5 py-0.5 rounded border">Esc</kbd> Cerrar modal</li>
+      <li><kbd class="bg-gray-100 px-1.5 py-0.5 rounded border">1</kbd>–<kbd class="bg-gray-100 px-1.5 py-0.5 rounded border">8</kbd> Saltar a sección</li>
+      <li><kbd class="bg-gray-100 px-1.5 py-0.5 rounded border">Ctrl</kbd>+<kbd class="bg-gray-100 px-1.5 py-0.5 rounded border">P</kbd> Preparar PDF</li>
+      <li><kbd class="bg-gray-100 px-1.5 py-0.5 rounded border">/</kbd> Foco en buscador</li>
+      <li><kbd class="bg-gray-100 px-1.5 py-0.5 rounded border">?</kbd> Esta ayuda</li>
+    </ul>
+    <button onclick="closeModal('modal-ayuda')" class="mt-4 w-full bg-sena-green text-white py-2 rounded-lg font-bold text-xs">Cerrar</button>
+  </div>
+</div>
+
+<!-- Analizador IA -->
+<div id="modal-analizador-ia" role="dialog" aria-modal="true" aria-labelledby="ia-title" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4 overflow-y-auto">
+  <div class="bg-white w-full max-w-5xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col my-auto max-h-[92vh]">
+    <div class="bg-sena-dark text-white p-4 flex justify-between items-center border-b-4 border-sena-green">
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-microscope text-sena-green text-lg"></i>
+        <h3 id="ia-title" class="text-sm font-extrabold tracking-wide">Analizador Multimodal & Matriz de Priorización SENA</h3>
+      </div>
+      <button onclick="closeModal('modal-analizador-ia')" class="text-slate-300 hover:text-white text-xl font-bold px-2" aria-label="Cerrar">&times;</button>
+    </div>
+    <div class="p-5 overflow-y-auto custom-scroll flex-1 space-y-4">
+
+      <div class="bg-amber-50 border border-amber-300 text-amber-900 text-xs p-3 rounded-lg flex items-start gap-2">
+        <i class="fa-solid fa-shield-halved text-amber-600 mt-0.5"></i>
+        <div>
+          <strong>Seguridad:</strong> La API Key <u>no se almacena</u> en localStorage. En <b>modo proxy</b> la clave vive en el servidor (<code>server.js</code>) y nunca viaja al navegador. El <b>modo directo</b> solo debe usarse en demos locales.
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-slate-50 p-3 rounded-lg border border-slate-200">
+        <div>
+          <label for="analysis-mode" class="block text-xs font-semibold text-slate-700 mb-1">Modo de Análisis:</label>
+          <select id="analysis-mode" onchange="toggleApiInput(); saveState()" class="w-full text-xs p-2 border border-slate-300 rounded-md focus:outline-none focus:border-sena-green">
+            <option value="sim">Simulación (datos ficticios)</option>
+            <option value="real">Consulta Real (proxy o directo)</option>
+          </select>
+          <p class="text-[10px] text-slate-500 mt-1">
+            <i class="fa-solid fa-info-circle"></i> Modo real requiere imagen. Proxy recomendado: <code>http://localhost:3001/api/analizar</code>
+          </p>
+        </div>
+        <div id="api-key-wrap">
+          <label for="input-api-key" class="block text-xs font-semibold text-slate-700 mb-1">
+            API Key (solo si usa modo directo):
+          </label>
+          <div class="relative">
+            <input type="password" id="input-api-key" placeholder="sk-..." disabled autocomplete="off"
+                   class="w-full text-xs p-2 pr-9 border border-slate-300 rounded-md focus:outline-none focus:border-sena-green bg-slate-100 font-mono">
+            <button type="button" onclick="toggleApiKeyVisibility()" class="absolute right-2 top-1.5 text-slate-500 hover:text-sena-dark" aria-label="Mostrar/ocultar clave">
+              <i id="eye-icon" class="fa-solid fa-eye text-xs"></i>
+            </button>
+          </div>
+          <button type="button" onclick="verificarProxy()" class="mt-1 text-[10px] text-sena-green hover:underline">
+            <i class="fa-solid fa-plug"></i> Verificar conexión proxy
+          </button>
+          <span id="proxy-status" class="text-[10px] ml-1"></span>
+        </div>
+      </div>
+
+      <div>
+        <label for="question-text-modal" class="block text-xs font-bold text-sena-dark mb-1">Pregunta Problema de Investigación Evaluada:</label>
+        <textarea id="question-text-modal" rows="3" oninput="validarPregunta()" class="w-full text-xs p-2.5 border border-slate-300 rounded-md focus:outline-none focus:border-sena-green font-sans leading-relaxed"></textarea>
+        <div class="flex justify-between items-center mt-1">
+          <p id="q-validation" class="text-[11px] text-slate-500">Listo para analizar.</p>
+          <span id="q-counter" class="text-[11px] text-slate-500 font-mono">0 / 500</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <label for="modal-img-input" class="block text-xs font-semibold text-slate-700 mb-1">Imagen del Instrumento <span class="text-red-500">*</span> (modo real):</label>
+          <input type="file" id="modal-img-input" accept="image/png,image/jpeg,image/webp" onchange="previewImagen(event)" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-sena-green file:text-white hover:file:bg-sena-darkGreen cursor-pointer">
+          <div id="img-preview-wrap" class="hidden mt-2 relative">
+            <img id="img-preview" class="max-h-32 rounded border shadow-sm" alt="Preview de imagen">
+            <button onclick="quitarImagen()" class="absolute -top-2 -right-2 bg-red-500 text-white w-5 h-5 rounded-full text-xs shadow" aria-label="Quitar imagen">&times;</button>
+            <p id="img-size" class="text-[10px] text-slate-500 mt-1"></p>
+          </div>
+        </div>
+        <div>
+          <label for="modal-context-input" class="block text-xs font-semibold text-slate-700 mb-1">Contexto de Inmersión:</label>
+          <input type="text" id="modal-context-input" oninput="saveState()" placeholder="Ej. Taller participativo con instructores…" class="w-full text-xs p-2 border border-slate-300 rounded-md focus:outline-none focus:border-sena-green">
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-2 border-t flex-wrap">
+        <button id="btn-analizar" onclick="ejecutarAnalisisIA()" class="bg-sena-green hover:bg-sena-darkGreen text-white font-bold px-4 py-2 rounded-lg text-xs transition-all flex items-center gap-1.5">
+          <i class="fa-solid fa-play"></i> Ejecutar Análisis & Matriz
+        </button>
+        <button id="btn-cancelar-analisis" onclick="cancelarAnalisis()" class="hidden bg-red-500 hover:bg-red-600 text-white font-bold px-3 py-2 rounded-lg text-xs transition-all flex items-center gap-1.5">
+          <i class="fa-solid fa-stop"></i> Cancelar
+        </button>
+        <button onclick="exportarMatriz('csv')" class="bg-sena-orange hover:bg-orange-600 text-white font-bold px-3 py-2 rounded-lg text-xs transition-all flex items-center gap-1.5"><i class="fa-solid fa-file-csv"></i> CSV</button>
+        <button onclick="exportarMatriz('json')" class="bg-slate-600 hover:bg-slate-700 text-white font-bold px-3 py-2 rounded-lg text-xs transition-all flex items-center gap-1.5"><i class="fa-solid fa-file-code"></i> JSON</button>
+        <button onclick="exportarMatriz('md')" class="bg-slate-600 hover:bg-slate-700 text-white font-bold px-3 py-2 rounded-lg text-xs transition-all flex items-center gap-1.5"><i class="fa-solid fa-file-lines"></i> MD</button>
+        <button onclick="copiarPregunta()" class="ml-auto bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-3 py-2 rounded-lg text-xs transition-all flex items-center gap-1.5"><i class="fa-solid fa-copy"></i> Copiar pregunta</button>
+      </div>
+
+      <div id="modal-results-container" class="space-y-3 pt-3 border-t" aria-live="polite">
+        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+          <h4 class="text-xs font-bold text-sena-dark mb-1">1 · Lectura descriptiva</h4>
+          <p id="res-lectura" class="text-xs text-slate-600">Ejecute el análisis para procesar la lectura descriptiva.</p>
+        </div>
+        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+          <h4 class="text-xs font-bold text-sena-dark mb-1">2 · Hallazgos & Límites</h4>
+          <p id="res-hallazgos" class="text-xs text-slate-600">En espera.</p>
+        </div>
+        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+          <h4 class="text-xs font-bold text-sena-dark mb-2">3 · Matriz de priorización SENA</h4>
+          <div class="overflow-x-auto custom-scroll">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead><tr class="bg-sena-dark text-white"><th class="p-2 border">Evidencia</th><th class="p-2 border">Acción</th><th class="p-2 border">Clasificación</th><th class="p-2 border">Ámbito</th></tr></thead>
+              <tbody id="modal-matrix-body" class="divide-y divide-slate-200">
+                <tr><td colspan="4" class="p-3 text-center text-slate-400">Sin datos generados.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ============ JAVASCRIPT ============ -->
+<script>
+'use strict';
+
+/* ================== CONFIGURACIÓN GLOBAL ================== */
+const STORAGE_KEY = 'sena-fpi-dashboard-v3';
+const ANALYZER_CONFIG = {
+  // 'proxy'  → recomendado (clave en server.js, nunca en el navegador)
+  // 'direct' → SOLO demo local (clave expuesta en DevTools)
+  // 'sim'    → datos ficticios, sin red
+  mode: 'proxy',
+  proxyUrl: 'http://localhost:3001/api/analizar',
+  proxyHealthUrl: 'http://localhost:3001/api/health',
+  directOpenAIUrl: 'https://api.openai.com/v1/chat/completions',
+  model: 'gpt-4o',
+  timeoutMs: 45000,
+  maxRetries: 3
+};
+
+let state = {
+  activeTabDesc: 'tab31', activeTabObj: 'objGen',
+  question: '¿De qué manera se puede diseñar y estructurar una ruta metodológica para la promoción de la investigación pedagógica en la Formación Profesional Integral (FPI), que responda a las realidades de los instructores de taller y transversales e integre las empresas didácticas simuladas como escenarios de producción de conocimiento en un contexto formativo y período de estudio delimitados?',
+  analysisMode: 'sim', context: '', theme: 'light',
+  expandedAll: false, matrizData: []
+};
+
+let imagenBase64 = null;
+let abortController = null;
+let lastFocused = null;
+
+/* ================== PERSISTENCIA ================== */
+function saveState() {
+  try {
+    const s = { ...state };
+    delete s._apiKey;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+  } catch (e) { console.warn('saveState', e); }
+}
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    state = { ...state, ...JSON.parse(raw) };
+  } catch (e) { console.warn('loadState', e); }
+}
+
+/* ================== TOASTS ================== */
+function toast(msg, type = '') {
+  const cont = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  cont.appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 2600);
+}
+
+/* ================== TABS ================== */
+function switchTab(group, tabId, persist = true) {
+  document.querySelectorAll(`.${group}-content`).forEach(el => el.classList.remove('active'));
+  document.querySelectorAll(`.tab-btn-${group}`).forEach(btn => {
+    btn.classList.remove('bg-white','shadow','text-sena-green','bg-sena-green','text-white');
+    btn.classList.add('text-gray-600');
+    btn.setAttribute('aria-selected', 'false');
+  });
+  const panel = document.getElementById(tabId);
+  const btn = document.getElementById(`btn-${tabId}`);
+  if (panel) panel.classList.add('active');
+  if (btn) {
+    btn.classList.remove('text-gray-600');
+    btn.classList.add(group === 'desc' ? 'bg-white','shadow','text-sena-green' : 'bg-sena-green','text-white');
+    btn.setAttribute('aria-selected', 'true');
+  }
+  if (persist) {
+    if (group === 'desc') state.activeTabDesc = tabId;
+    if (group === 'obj') state.activeTabObj = tabId;
+    saveState();
+  }
+}
+
+/* ================== MODALES ACCESIBLES ================== */
+function openModal(id) {
+  lastFocused = document.activeElement;
+  const m = document.getElementById(id);
+  if (!m) return;
+  m.classList.remove('hidden'); m.classList.add('flex');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => {
+    const focusable = m.querySelector('button, input, textarea, select, [tabindex]:not([tabindex="-1"])');
+    if (focusable) focusable.focus();
+  }, 50);
+}
+function closeModal(id) {
+  const m = document.getElementById(id);
+  if (!m) return;
+  m.classList.add('hidden'); m.classList.remove('flex');
+  document.body.style.overflow = '';
+  if (lastFocused && lastFocused.focus) lastFocused.focus();
+}
+function toggleModal(id, show) { show ? openModal(id) : closeModal(id); }
+
+document.addEventListener('keydown', (e) => {
+  const openModalEl = document.querySelector('[role="dialog"]:not(.hidden)');
+  if (e.key === 'Escape' && openModalEl) { closeModal(openModalEl.id); e.preventDefault(); return; }
+  if (e.key === 'Tab' && openModalEl) {
+    const focusables = openModalEl.querySelectorAll('button, input, textarea, select, a[href], [tabindex]:not([tabindex="-1"])');
+    if (!focusables.length) return;
+    const first = focusables[0], last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) { last.focus(); e.preventDefault(); }
+    else if (!e.shiftKey && document.activeElement === last) { first.focus(); e.preventDefault(); }
+  }
+  if (!openModalEl && !/input|textarea|select/i.test(e.target.tagName)) {
+    if (/^[1-8]$/.test(e.key)) {
+      const sec = document.getElementById(`sec-${e.key}`);
+      if (sec) { sec.scrollIntoView({behavior:'smooth', block:'start'}); e.preventDefault(); }
+    }
+    if (e.key === '?') { openModal('modal-ayuda'); e.preventDefault(); }
+    if (e.key === '/') { document.getElementById('search-input').focus(); e.preventDefault(); }
+  }
+});
+
+/* ================== CONCEPTOS ================== */
+function showConceptModal(key) {
+  const concepts = {
+    'FPI': { title:'Formación Profesional Integral (FPI)', desc:'Proceso teórico-práctico del SENA orientado al desarrollo de competencias laborales, humanas y tecnológicas en los aprendices.' },
+    'Instructores': { title:'Instructores de Taller y Transversales', desc:'Unidades principales de análisis. Instructores de especialidades técnicas directas en laboratorio/taller y docentes de áreas humanas, básicas y lenguajes.' },
+    'Empresas': { title:'Empresas Didácticas Simuladas', desc:'Ambientes de aprendizaje enriquecidos que replican entornos organizacionales reales, sirviendo como escenarios de investigación pedagógica.' },
+    'Ruta': { title:'Ruta Metodológica de Promoción', desc:'Paso a paso inductivo, flexible e intuitivo para transformar las reflexiones docentes en productos científicos (Libros, Manuales, Prototipos y Software).' }
+  };
+  const c = concepts[key]; if (!c) return;
+  document.getElementById('concept-title').textContent = c.title;
+  document.getElementById('concept-desc').textContent = c.desc;
+  openModal('modal-concept');
+}
+
+/* ================== EXPANDIR / TEMA ================== */
+function toggleExpandAll() {
+  state.expandedAll = !state.expandedAll;
+  document.querySelectorAll('.dashboard-card').forEach(c => c.classList.toggle('expanded', state.expandedAll));
+  const btn = document.getElementById('btn-expand');
+  btn.setAttribute('aria-pressed', state.expandedAll.toString());
+  btn.innerHTML = state.expandedAll ? '<i class="fa-solid fa-compress"></i>' : '<i class="fa-solid fa-expand"></i>';
+  toast(state.expandedAll ? 'Tarjetas expandidas' : 'Tarjetas colapsadas');
+  saveState();
+}
+function toggleTheme() {
+  state.theme = state.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.classList.toggle('dark', state.theme === 'dark');
+  document.getElementById('theme-icon').className = state.theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+  saveState();
+}
+
+/* ================== BUSCADOR ================== */
+const searchInput = document.getElementById('search-input');
+let searchTimeout;
+searchInput.addEventListener('input', (e) => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => aplicarBusqueda(e.target.value.trim()), 200);
+});
+function aplicarBusqueda(term) {
+  document.querySelectorAll('mark').forEach(m => { const p = m.parentNode; p.replaceChild(document.createTextNode(m.textContent), m); p.normalize(); });
+  document.querySelectorAll('[data-searchable]').forEach(sec => {
+    sec.style.display = '';
+    if (!term) return;
+    const found = sec.textContent.toLowerCase().includes(term.toLowerCase());
+    sec.style.display = found ? '' : 'none';
+    if (found) resaltar(sec, term);
+  });
+  if (term) toast(`Búsqueda: "${term}"`, 'warn');
+}
+function resaltar(root, term) {
+  const re = new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode: n => /SCRIPT|STYLE/.test(n.parentNode.tagName) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT
+  });
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach(n => {
+    if (re.test(n.textContent)) {
+      const span = document.createElement('span');
+      span.innerHTML = n.textContent.replace(re, '<mark>$1</mark>');
+      n.parentNode.replaceChild(span, n);
+    }
+  });
+}
+
+/* ================== IMAGEN FALLBACK ================== */
+function imgFallback(img) {
+  if (img.dataset.fb === '1') { img.dataset.fb = '2'; img.src = './assets/img/ruta-metodologica.jpeg'; return; }
+  if (img.dataset.fb === '2') { img.dataset.fb = '3'; img.src = 'https://placehold.co/800x500/39A900/ffffff?text=Diagrama+Metodol%C3%B3gico'; return; }
+  if (img.dataset.fb === '3') {
+    img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+      `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500"><rect fill="#F4F6F8" width="800" height="500"/><text x="400" y="240" font-family="Work Sans,Arial" font-size="22" fill="#003049" text-anchor="middle" font-weight="700">Ruta Metodológica</text><text x="400" y="270" font-family="Work Sans,Arial" font-size="14" fill="#64748B" text-anchor="middle">Coloque su imagen en ./assets/img/ruta-metodologica.jpg</text><rect x="340" y="290" width="120" height="30" rx="6" fill="#39A900"/><text x="400" y="310" font-family="Work Sans,Arial" font-size="12" fill="#fff" text-anchor="middle">Ver diagrama</text></svg>`
+    );
+  }
+}
+
+/* ================== CRONOGRAMA ================== */
+const cronogramaData = [
+  { fase: '1. Inmersión y diagnóstico', start: 1, end: 3, color: '#39A900' },
+  { fase: '2. Encuestas (14) y Entrevistas (6)', start: 2, end: 4, color: '#39A900' },
+  { fase: '3. Diseño Ruta + Empresas Didácticas', start: 4, end: 7, color: '#FF6B00' },
+  { fase: '4. Manual, Software y Prototipo', start: 6, end: 9, color: '#003049' },
+  { fase: '5. Libro y publicación web/revista', start: 8, end: 12, color: '#39A900' }
+];
+function renderGantt() {
+  const cont = document.getElementById('gantt-container');
+  if (!cont) return;
+  let html = '<div class="font-bold text-slate-600 text-[10px] py-1">Fase</div>';
+  for (let m = 1; m <= 12; m++) html += `<div class="text-center font-bold text-slate-600 text-[10px] py-1">M${m}</div>`;
+  cronogramaData.forEach(row => {
+    html += `<div class="font-semibold text-slate-700 text-[11px] py-1.5 pr-2 truncate" title="${row.fase}">${row.fase}</div>`;
+    for (let m = 1; m <= 12; m++) {
+      const inBar = m >= row.start && m <= row.end;
+      html += `<div class="border-l border-slate-200 py-1.5 px-0.5" title="${row.fase} · Mes ${m}">${
+        inBar ? `<div class="gantt-bar" style="background:linear-gradient(90deg,${row.color},${row.color}cc)">${m===row.start?'▶':''}</div>` : ''
+      }</div>`;
+    }
+  });
+  cont.innerHTML = html;
+}
+function exportarICS() {
+  const now = new Date();
+  const year = now.getFullYear();
+  let ics = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//SENA FPI//Cronograma//ES\r\nCALSCALE:GREGORIAN\r\n';
+  cronogramaData.forEach((row, i) => {
+    const startMonth = (now.getMonth() + row.start) % 12;
+    const endMonth = (now.getMonth() + row.end) % 12;
+    const y1 = year + Math.floor((now.getMonth() + row.start) / 12);
+    const y2 = year + Math.floor((now.getMonth() + row.end) / 12);
+    const pad = n => String(n).padStart(2, '0');
+    ics += 'BEGIN:VEVENT\r\n';
+    ics += `UID:sena-fpi-${i}-${Date.now()}@sena.edu.co\r\n`;
+    ics += `DTSTAMP:${year}0101T000000Z\r\n`;
+    ics += `DTSTART;VALUE=DATE:${y1}${pad(startMonth + 1)}01\r\nDTEND;VALUE=DATE:${y2}${pad(endMonth + 1)}28\r\n`;
+    ics += `SUMMARY:${row.fase}\r\n`;
+    ics += 'END:VEVENT\r\n';
+  });
+  ics += 'END:VCALENDAR\r\n';
+  descargar('cronograma-sena-fpi.ics', ics, 'text/calendar');
+  toast('Cronograma exportado a .ics');
+}
+
+/* ================== VALIDACIÓN PREGUNTA ================== */
+function validarPregunta() {
+  const q = document.getElementById('question-text-modal').value.trim();
+  const words = q.split(/\s+/).filter(Boolean).length;
+  document.getElementById('q-counter').textContent = `${q.length} / 500`;
+  const verbos = ['diseñar','estructurar','analizar','evaluar','implementar','determinar','identificar','proponer','comparar','describir','integrar'];
+  const tieneVerbo = verbos.some(v => q.toLowerCase().includes(v));
+  const el = document.getElementById('q-validation');
+  let msg = '', color = 'text-slate-500';
+  if (q.length < 80) { msg = '⚠ La pregunta es muy corta (mín. 80 caracteres).'; color = 'text-amber-600'; }
+  else if (q.length > 500) { msg = '⚠ Supera 500 caracteres.'; color = 'text-red-600'; }
+  else if (words < 10) { msg = '⚠ Menos de 10 palabras.'; color = 'text-amber-600'; }
+  else if (!tieneVerbo) { msg = '⚠ No se detecta verbo de investigación.'; color = 'text-amber-600'; }
+  else { msg = '✓ Pregunta válida (' + words + ' palabras).'; color = 'text-sena-darkGreen font-semibold'; }
+  el.textContent = msg; el.className = 'text-[11px] ' + color;
+  state.question = q; saveState();
+  return q.length >= 80 && q.length <= 500;
+}
+
+/* ================== IMAGEN PREVIEW + COMPRESIÓN ================== */
+function previewImagen(ev) {
+  const file = ev.target.files[0]; if (!file) return;
+  if (!/^image\/(png|jpeg|webp)$/.test(file.type)) { toast('Formato no permitido (PNG/JPG/WEBP)', 'error'); return; }
+  if (file.size > 15 * 1024 * 1024) { toast('Imagen > 15 MB', 'error'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ratio = Math.min(1024 / img.width, 1024 / img.height, 1);
+      canvas.width = img.width * ratio; canvas.height = img.height * ratio;
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      imagenBase64 = canvas.toDataURL('image/jpeg', 0.85);
+      document.getElementById('img-preview').src = imagenBase64;
+      document.getElementById('img-preview-wrap').classList.remove('hidden');
+      const kb = Math.round(imagenBase64.length / 1024);
+      document.getElementById('img-size').textContent = `${canvas.width}×${canvas.height} · ~${kb} KB`;
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function quitarImagen() {
+  imagenBase64 = null;
+  document.getElementById('modal-img-input').value = '';
+  document.getElementById('img-preview-wrap').classList.add('hidden');
+}
+
+/* ================== ANALIZADOR: UI AUX ================== */
+function toggleApiInput() {
+  const mode = document.getElementById('analysis-mode').value;
+  const input = document.getElementById('input-api-key');
+  input.disabled = mode !== 'real';
+  input.classList.toggle('bg-slate-100', mode !== 'real');
+  state.analysisMode = mode; saveState();
+}
+function toggleApiKeyVisibility() {
+  const input = document.getElementById('input-api-key');
+  const icon = document.getElementById('eye-icon');
+  if (input.type === 'password') { input.type = 'text'; icon.className = 'fa-solid fa-eye-slash'; }
+  else { input.type = 'password'; icon.className = 'fa-solid fa-eye'; }
+}
+async function verificarProxy() {
+  const statusEl = document.getElementById('proxy-status');
+  statusEl.textContent = 'Verificando…';
+  statusEl.className = 'text-[10px] ml-1 text-slate-500';
+  try {
+    const r = await fetch(ANALYZER_CONFIG.proxyHealthUrl, { method: 'GET' });
+    if (r.ok) {
+      statusEl.textContent = '✅ Proxy OK';
+      statusEl.className = 'text-[10px] ml-1 text-sena-darkGreen font-semibold';
+    } else {
+      statusEl.textContent = `⚠ Proxy ${r.status}`;
+      statusEl.className = 'text-[10px] ml-1 text-amber-600 font-semibold';
+    }
+  } catch {
+    statusEl.textContent = '❌ Proxy no disponible';
+    statusEl.className = 'text-[10px] ml-1 text-red-600 font-semibold';
+  }
+}
+
+/* ================== ANALIZADOR: EJECUCIÓN ================== */
+async function ejecutarAnalisisIA() {
+  const q = document.getElementById('question-text-modal').value.trim();
+  if (!validarPregunta()) { toast('Corrija la pregunta antes de analizar', 'error'); return; }
+
+  const mode = document.getElementById('analysis-mode').value;
+  const apiKey = document.getElementById('input-api-key').value.trim();
+  const contexto = document.getElementById('modal-context-input').value.trim();
+  const btn = document.getElementById('btn-analizar');
+  const btnCancel = document.getElementById('btn-cancelar-analisis');
+
+  if (mode === 'real') {
+    if (ANALYZER_CONFIG.mode === 'direct' && !apiKey) {
+      toast('Falta la API Key (modo directo).', 'error'); return;
+    }
+    if (!imagenBase64) {
+      toast('Cargue una imagen del instrumento antes de analizar.', 'error');
+      document.getElementById('modal-img-input').focus(); return;
+    }
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Analizando…';
+  btnCancel.classList.remove('hidden');
+  abortController = new AbortController();
+
+  try {
+    let result;
+    if (mode === 'sim') {
+      result = await analisisSimulado();
+      toast('Análisis simulado generado');
+    } else if (ANALYZER_CONFIG.mode === 'proxy') {
+      result = await analisisViaProxy({ pregunta: q, contexto, imagenBase64 });
+      toast('Análisis completado (proxy seguro)');
+    } else {
+      result = await analisisDirectoOpenAI({ apiKey, pregunta: q, contexto, imagenBase64 });
+      toast('Análisis completado (modo directo)');
+    }
+    aplicarResultados(result);
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      toast('Análisis cancelado por el usuario', 'warn');
+      document.getElementById('res-lectura').textContent = 'Análisis cancelado.';
+    } else {
+      toast('Error: ' + err.message, 'error');
+      document.getElementById('res-lectura').textContent = 'Error: ' + err.message;
+      document.getElementById('res-hallazgos').textContent = 'Revise la consola y reintente.';
+      console.error('[Analizador]', err);
+    }
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-play"></i> Ejecutar Análisis & Matriz';
+    btnCancel.classList.add('hidden');
+    abortController = null;
+  }
+}
+
+function cancelarAnalisis() {
+  if (abortController) {
+    abortController.abort();
+    toast('Cancelando…', 'warn');
+  }
+}
+
+/* ================== ANALIZADOR: MODOS ================== */
+async function analisisSimulado() {
+  await new Promise(r => setTimeout(r, 900));
+  return {
+    lectura: '1. Descripción general: Panel Metaplan clasificado en 3 columnas sobre papel craft. 2. Tipo: Diagnóstico participativo. 3. Propósito: Registrar percepciones de instructores sobre la Guía de Aprendizaje.',
+    hallazgos: 'Límites observados: 2 tarjetas con baja legibilidad por sombra. No se infieren datos no sustentados.',
+    matriz: [
+      { evidencia: 'Percepción de rigidez burocrática', accion: 'Diseñar módulo flexible de planeación', clasificacion: 'Prioritaria SENA', ambito: 'FPI / SENNOVA' },
+      { evidencia: 'Desconexión con empresas simuladas', accion: 'Estructurar ruta metodológica articuladora', clasificacion: 'Prioritaria SENA', ambito: 'Investigación Aplicada' }
+    ]
+  };
+}
+
+async function analisisViaProxy({ pregunta, contexto, imagenBase64 }) {
+  const timeoutId = setTimeout(() => abortController.abort(), ANALYZER_CONFIG.timeoutMs);
+  try {
+    const resp = await fetch(ANALYZER_CONFIG.proxyUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pregunta, contexto, imagenBase64 }),
+      signal: abortController.signal
+    });
+    clearTimeout(timeoutId);
+    if (!resp.ok) {
+      let msg = `Error ${resp.status}`;
+      try { const j = await resp.json(); msg = j.error || msg; } catch {}
+      throw new Error(msg);
+    }
+    return validarRespuesta(await resp.json());
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') throw err;
+    if (String(err.message).includes('Failed to fetch')) {
+      throw new Error('No se pudo conectar al proxy. ¿Está corriendo server.js en ' + ANALYZER_CONFIG.proxyUrl + '?');
+    }
+    throw err;
+  }
+}
+
+async function analisisDirectoOpenAI({ apiKey, pregunta, contexto, imagenBase64 }) {
+  const prompt = `Eres un analista educativo del SENA. Analiza la pregunta de investigación:
+"${pregunta}"
+Contexto: ${contexto || 'No especificado'}.
+
+Devuelve EXCLUSIVAMENTE un objeto JSON válido (sin markdown, sin explicaciones) con esta estructura:
+{
+  "lectura": "...",
+  "hallazgos": "...",
+  "matriz": [{ "evidencia": "...", "accion": "...", "clasificacion": "...", "ambito": "..." }]
+}
+Máximo 4 filas. Responde en español.`;
+
+  let lastError;
+  for (let attempt = 1; attempt <= ANALYZER_CONFIG.maxRetries; attempt++) {
+    const timeoutId = setTimeout(() => abortController.abort(), ANALYZER_CONFIG.timeoutMs);
+    try {
+      const resp = await fetch(ANALYZER_CONFIG.directOpenAIUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+        body: JSON.stringify({
+          model: ANALYZER_CONFIG.model,
+          messages: [{
+            role: 'user',
+            content: [
+              { type: 'text', text: prompt },
+              { type: 'image_url', image_url: { url: imagenBase64, detail: 'low' } }
+            ]
+          }],
+          response_format: { type: 'json_object' },
+          max_tokens: 900,
+          temperature: 0.3
+        }),
+        signal: abortController.signal
+      });
+      clearTimeout(timeoutId);
+      if (resp.status === 401) throw new Error('API Key inválida (401).');
+      if (resp.status === 429) {
+        if (attempt < ANALYZER_CONFIG.maxRetries) {
+          const wait = 1000 * Math.pow(2, attempt);
+          toast(`Rate limit. Reintentando en ${wait/1000}s…`, 'warn');
+          await new Promise(r => setTimeout(r, wait));
+          continue;
+        }
+        throw new Error('Límite de uso excedido (429).');
+      }
+      if (resp.status >= 500) {
+        if (attempt < ANALYZER_CONFIG.maxRetries) {
+          const wait = 1000 * Math.pow(2, attempt);
+          toast(`OpenAI ${resp.status}. Reintentando…`, 'warn');
+          await new Promise(r => setTimeout(r, wait));
+          continue;
+        }
+        throw new Error(`OpenAI ${resp.status}.`);
+      }
+      if (!resp.ok) {
+        const errText = await resp.text();
+        throw new Error(`OpenAI ${resp.status}: ${errText.slice(0, 200)}`);
+      }
+      const data = await resp.json();
+      let raw = data.choices?.[0]?.message?.content || '';
+      raw = raw.trim().replace(/^```json\s*/i, '').replace(/```$/, '').trim();
+      let parsed;
+      try { parsed = JSON.parse(raw); }
+      catch { throw new Error('El modelo devolvió JSON inválido.'); }
+      return validarRespuesta(parsed);
+    } catch (err) {
+      clearTimeout(timeoutId);
+      lastError = err;
+      if (err.name === 'AbortError') throw err;
+      if (err.message.includes('401')) throw err;
+      if (attempt >= ANALYZER_CONFIG.maxRetries) throw lastError;
+    }
+  }
+  throw lastError;
+}
+
+function validarRespuesta(obj) {
+  if (!obj || typeof obj !== 'object') throw new Error('Respuesta vacía del modelo.');
+  if (typeof obj.lectura !== 'string' || !obj.lectura.trim()) throw new Error('Falta campo "lectura".');
+  if (typeof obj.hallazgos !== 'string' || !obj.hallazgos.trim()) throw new Error('Falta campo "hallazgos".');
+  if (!Array.isArray(obj.matriz)) throw new Error('Falta campo "matriz".');
+  obj.matriz = obj.matriz.slice(0, 6).map(r => ({
+    evidencia: String(r.evidencia || ''),
+    accion: String(r.accion || ''),
+    clasificacion: String(r.clasificacion || ''),
+    ambito: String(r.ambito || '')
+  }));
+  return obj;
+}
+
+function aplicarResultados({ lectura, hallazgos, matriz }) {
+  document.getElementById('res-lectura').textContent = lectura || '';
+  document.getElementById('res-hallazgos').textContent = hallazgos || '';
+  state.matrizData = matriz || [];
+  const body = document.getElementById('modal-matrix-body');
+  if (!matriz || !matriz.length) {
+    body.innerHTML = '<tr><td colspan="4" class="p-3 text-center text-slate-400">Sin resultados.</td></tr>';
+    return;
+  }
+  body.innerHTML = matriz.map(r => `
+    <tr class="hover:bg-slate-50">
+      <td class="p-2 border">${escapeHtml(r.evidencia)}</td>
+      <td class="p-2 border">${escapeHtml(r.accion)}</td>
+      <td class="p-2 border font-bold text-sena-darkGreen">${escapeHtml(r.clasificacion)}</td>
+      <td class="p-2 border">${escapeHtml(r.ambito)}</td>
+    </tr>`).join('');
+  saveState();
+}
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ================== EXPORTACIONES ================== */
+function exportarMatriz(fmt) {
+  const data = state.matrizData;
+  if (!data.length) { toast('Ejecute el análisis primero', 'warn'); return; }
+  let content = '', mime = '', ext = '';
+  if (fmt === 'csv') {
+    const esc = v => `"${String(v).replace(/"/g,'""')}"`;
+    content = '\uFEFF' + ['Evidencia,Acción,Clasificación,Ámbito']
+      .concat(data.map(r => [r.evidencia,r.accion,r.clasificacion,r.ambito].map(esc).join(','))).join('\r\n');
+    mime = 'text/csv;charset=utf-8'; ext = 'csv';
+  } else if (fmt === 'json') {
+    content = JSON.stringify(data, null, 2); mime = 'application/json'; ext = 'json';
+  } else {
+    content = '| Evidencia | Acción | Clasificación | Ámbito |\n|---|---|---|---|\n' +
+      data.map(r => `| ${r.evidencia} | ${r.accion} | ${r.clasificacion} | ${r.ambito} |`).join('\n');
+    mime = 'text/markdown'; ext = 'md';
+  }
+  descargar(`matriz_priorizacion_sena.${ext}`, content, mime);
+  toast(`Matriz exportada (.${ext})`);
+}
+function descargar(filename, content, mime) {
+  const blob = new Blob([content], { type: mime });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+}
+function copiarPregunta() {
+  const q = document.getElementById('question-text-modal').value.trim();
+  navigator.clipboard.writeText(q).then(() => toast('Pregunta copiada')).catch(() => toast('No se pudo copiar', 'error'));
+}
+function copiarBibliografia() {
+  const txt = Array.from(document.querySelectorAll('#biblio-content p')).map(p => p.textContent.trim()).join('\n\n');
+  navigator.clipboard.writeText(txt).then(() => toast('Bibliografía copiada')).catch(() => toast('No se pudo copiar', 'error'));
+}
+
+/* ================== PDF ================== */
+function prepararPDF() {
+  document.querySelectorAll('.dashboard-card').forEach(c => c.classList.add('expanded'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.add('active'));
+  toast('Preparando PDF… (usa Ctrl+P si no se abre)');
+  setTimeout(() => window.print(), 400);
+}
+
+/* ================== BACK TO TOP ================== */
+window.addEventListener('scroll', () => {
+  document.getElementById('btn-top').classList.toggle('show', window.scrollY > 400);
+});
+window.addEventListener('hashchange', () => {
+  const el = document.querySelector(location.hash);
+  if (el) el.scrollIntoView({behavior:'smooth'});
+});
+
+/* ================== INIT ================== */
+document.addEventListener('DOMContentLoaded', () => {
+  loadState();
+
+  if (state.theme === 'dark') document.documentElement.classList.add('dark');
+  document.getElementById('theme-icon').className = state.theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+
+  document.getElementById('question-text-modal').value = state.question;
+  document.getElementById('modal-context-input').value = state.context || '';
+  document.getElementById('analysis-mode').value = state.analysisMode || 'sim';
+  toggleApiInput();
+  validarPregunta();
+
+  switchTab('desc', state.activeTabDesc, false);
+  switchTab('obj', state.activeTabObj, false);
+
+  renderGantt();
+  if (state.expandedAll) toggleExpandAll();
+
+  if (state.matrizData && state.matrizData.length) {
+    aplicarResultados({
+      lectura: 'Resultados cargados desde la sesión anterior.',
+      hallazgos: 'Puede volver a ejecutar el análisis para actualizar.',
+      matriz: state.matrizData
+    });
+  }
+
+  toast('Dashboard cargado');
+});
+</script>
+</body>
+</html>
